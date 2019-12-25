@@ -1,0 +1,61 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+      <h1 class='posttitle loader'>{{ post.title }}</h1>
+      <p class='postcontent' >{{ post.text|safe|linebreaksbr }}</p>
+
+
+      {% if user.is_authenticated %}
+          {% if user.is_superuser %}
+          <a class="btn btn-primary" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+          <a class="btn btn-primary" href="{% url 'post_remove' pk=post.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
+          {% endif %}
+    {% endif %}
+  <hr>
+  <a class="btn btn-primary btn-comment" href="{% url 'add_comment_to_post' pk=post.pk %}">Add comment</a>
+  <div class="container">
+  {% for comment in post.comments.all %}
+  <br>
+    <p>{{ comment.text|safe|linebreaks }}</p>
+    <p>Posted by: <strong>{{ comment.author }}</strong></p>
+  {% empty %}
+      <p>No comments posted.</p>
+  {% endfor %}
+  <a href="#" onClick="document.getElementById('likebutton').submit()">Like This Post</a> {{post.likes}}   |   <a href="#" onClick="document.getElementById('dislikebutton').submit()">Dislike This Post</a> {{post.dislikes}}
+
+
+  <form id="likebutton" method="POST" action="/post/{{post.id}}/preference/1/">
+    {% csrf_token %}
+    <input type="hidden">
+  </form>
+  <form id="dislikebutton" method="POST" action="/post/{{post.id}}/preference/2/">
+    {% csrf_token %}
+    <input type="hidden">
+  </form>
+  <p>People who liked this Post: </p>
+  {% for preference in post.preferences.all %}
+      {% if user.is_authenticated %}
+              {% if preference.value == 1 %}
+                {{ preference.user }}
+                <br>
+              {% endif %}
+      {% endif %}
+  {% endfor %}
+  <br>
+  <br>
+  <p>People who Disliked this Post: </p>
+  {% for preference in post.preferences.all %}
+      {% if user.is_authenticated %}
+              {% if preference.value == 2 %}
+                {{ preference.user }}
+                <br>
+              {% endif %}
+      {% endif %}
+  {% endfor %}
+
+
+
+
+
+</div>
+
+{% endblock %}
